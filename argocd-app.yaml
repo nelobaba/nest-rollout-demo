@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/nelobaba/nest-rollout-demo.git   # <-- your repo
-    targetRevision: master
+    targetRevision: main
     path: k8s                       # the folder Argo CD watches
   destination:
     server: https://kubernetes.default.svc
