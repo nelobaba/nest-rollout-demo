@@ -18,12 +18,13 @@ spec:
     spec:
       containers:
         - name: nest-demo
-          image: docker.io/nelobaba/nest-rollout-demo:v1   # <-- edit to your Docker Hub user
+          # image: docker.io/nelobaba/nest-rollout-demo:v1   # <-- edit to your Docker Hub user
+          image: docker.io/nelobaba/nest-rollout-demo:v2  
           ports:
             - containerPort: 3000
           env:
             - name: FAIL_HEALTH
-              value: "false"          # v1 is healthy. Step 9 flips this to "true" for the bad release.
+              value: "true"          # v1 is healthy. Step 9 flips this to "true" for the bad release.
           readinessProbe:             # a pod out of this probe never receives traffic
             httpGet: { path: /health, port: 3000 }
             initialDelaySeconds: 5
