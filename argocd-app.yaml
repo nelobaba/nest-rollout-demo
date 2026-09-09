@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nest-rollout-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nelobaba/nest-rollout-demo.git   # <-- your repo
+    targetRevision: master
+    path: k8s                       # the folder Argo CD watches
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+  syncPolicy:
+    automated:                      # <-- this is "watch for new versions": auto-sync on every push
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
