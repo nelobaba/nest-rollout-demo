@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: nest-demo
+  namespace: demo
+spec:
+  replicas: 4
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 120       # if no progress for 120s...
+  progressDeadlineAbort: true        # ...auto-abort (don't just sit Degraded)
+  selector:
+    matchLabels:
+      app: nest-demo
+  template:
+    metadata:
+      labels:
+        app: nest-demo
+    spec:
+      containers:
+        - name: nest-demo
+          image: docker.io/nelobaba/nest-rollout-demo:v1   # <-- edit to your Docker Hub user
+          ports:
+            - containerPort: 3000
+          env:
+            - name: FAIL_HEALTH
+              value: "false"          # v1 is healthy. Step 9 flips this to "true" for the bad release.
+          readinessProbe:             # a pod out of this probe never receives traffic
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits:   { cpu: "250m", memory: "128Mi" }
+  strategy:
+    canary:
+      stableService: nest-demo-stable
+      canaryService: nest-demo-canary
+      steps:
+        - setWeight: 25
+        - pause: { duration: 30s }
+        - analysis:                    # <-- the taster runs here, against the canary
+            templates:
+              - templateName: health-check
+            args:
+              - name: canary-service
+                value: nest-demo-canary
+        - setWeight: 50
+        - pause: { duration: 30s }
+        - setWeight: 100

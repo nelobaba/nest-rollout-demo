@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: health-check
+  namespace: demo
+spec:
+  args:
+    - name: canary-service          # passed in by the Rollout
+  metrics:
+    - name: canary-health
+      interval: 10s                 # probe every 10s
+      count: 5                      # take 5 measurements
+      successCondition: 'result == "ok"'
+      failureLimit: 1               # a single failed measurement fails the whole analysis
+      provider:
+        web:
+          url: 'http://{{args.canary-service}}.demo.svc.cluster.local/health'
+          method: GET
+          jsonPath: '{$.status}'    # extract .status from the JSON body → compared above
