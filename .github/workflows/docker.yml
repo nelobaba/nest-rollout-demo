@@ -1,0 +1,19 @@
+name: build-and-push
+on:
+  push:
+    tags: ['v*']            # pushing tag v3 builds and pushes docker.io/<user>/nest-rollout-demo:v3
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: APP_VERSION=${{ github.ref_name }}
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/nest-rollout-demo:${{ github.ref_name }}

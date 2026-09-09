@@ -1,0 +1,11 @@
+# kind-cilium.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: rollouts-lab
+networking:
+  disableDefaultCNI: true      # <-- no kindnet; Cilium will fill this slot
+  # kubeProxyMode: none        # (advanced) uncomment to let Cilium fully replace kube-proxy
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
